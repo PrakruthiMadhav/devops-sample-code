@@ -5,21 +5,28 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Creating virtual environment and installing dependencies...'
+                bat '''
+                python -m venv venv
+                call venv\\Scripts\\activate
+                pip install Flask
+                '''
             }
         }
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat 'pip install Flask'
-                bat 'python -m unittest discover -s .'
+                bat '''
+                call venv\\Scripts\\activate
+                python -m unittest discover -s tests -p "test_*.py"
+                '''
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
                 bat '''
-                mkdir ${WORKSPACE}/python-app-deploy
-                copy ${WORKSPACE}/app.py ${WORKSPACE}/python-app-deploy/
+                mkdir %WORKSPACE%\\python-app-deploy
+                copy %WORKSPACE%\\app.py %WORKSPACE%\\python-app-deploy\\
                 '''
             }
         }
@@ -27,8 +34,8 @@ pipeline {
             steps {
                 echo 'Running application...'
                 bat '''
-                nohup python3 ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
-                echo $! > ${WORKSPACE}/python-app-deploy/app.pid
+                call venv\\Scripts\\activate
+                python %WORKSPACE%\\python-app-deploy\\app.py > %WORKSPACE%\\python-app-deploy\\app.log 2>&1
                 '''
             }
         }
@@ -36,7 +43,8 @@ pipeline {
             steps {
                 echo 'Testing application...'
                 bat '''
-                python3 ${WORKSPACE}/test_app.py
+                call venv\\Scripts\\activate
+                python %WORKSPACE%\\tests\\test_app.py
                 '''
             }
         }
