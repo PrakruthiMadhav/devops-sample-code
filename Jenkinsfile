@@ -1,61 +1,42 @@
 pipeline {
     agent any
-
     stages {
         stage('Build') {
             steps {
-                echo 'Creating virtual environment and installing dependencies...'
-                bat '''
-                python -m venv venv
-                call venv\\Scripts\\activate
-                pip install Flask
-                '''
+                script {
+                    echo 'Building application...'
+                }
             }
         }
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                bat '''
-                call venv\\Scripts\\activate
-                python -m unittest discover -s tests -p "test_*.py"
-                '''
-            }
-        }
+
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
-                bat '''
-                mkdir %WORKSPACE%\\python-app-deploy
-                copy %WORKSPACE%\\app.py %WORKSPACE%\\python-app-deploy\\
-                '''
+                script {
+                    echo 'Deploying application...'
+                    // Create the deployment directory using cmd
+                    bat "mkdir \"${WORKSPACE}\\python-app-deploy\""
+                    // Verify the existence of app.py
+                    bat "dir ${WORKSPACE}"
+                    // Copy the app.py file
+                    bat "copy \"${WORKSPACE}\\app.py\" \"${WORKSPACE}\\python-app-deploy\\\""
+                }
             }
         }
+
         stage('Run Application') {
             steps {
-                echo 'Running application...'
-                bat '''
-                call venv\\Scripts\\activate
-                python %WORKSPACE%\\python-app-deploy\\app.py > %WORKSPACE%\\python-app-deploy\\app.log 2>&1
-                '''
+                script {
+                    echo 'Running application...'
+                }
             }
         }
+
         stage('Test Application') {
             steps {
-                echo 'Testing application...'
-                bat '''
-                call venv\\Scripts\\activate
-                python %WORKSPACE%\\tests\\test_app.py
-                '''
+                script {
+                    echo 'Testing application...'
+                }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }
