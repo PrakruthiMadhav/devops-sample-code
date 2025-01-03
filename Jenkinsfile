@@ -10,13 +10,13 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh 'python3 -m unittest discover -s .'
+                bat 'python3 -m unittest discover -s .'
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                sh '''
+                bat '''
                 mkdir -p ${WORKSPACE}/python-app-deploy
                 cp ${WORKSPACE}/app.py ${WORKSPACE}/python-app-deploy/
                 '''
@@ -25,7 +25,7 @@ pipeline {
         stage('Run Application') {
             steps {
                 echo 'Running application...'
-                sh '''
+                bat '''
                 nohup python3 ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
                 echo $! > ${WORKSPACE}/python-app-deploy/app.pid
                 '''
@@ -34,7 +34,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo 'Testing application...'
-                sh '''
+                bat '''
                 python3 ${WORKSPACE}/test_app.py
                 '''
             }
