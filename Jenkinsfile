@@ -5,30 +5,20 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Creating virtual environment and installing dependencies...'
-                bat '''
-                python -m venv venv
-                .\\venv\\Scripts\\activate
-                pip install -r requirements.txt
-                '''
             }
         }
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat '''
-                .\\venv\\Scripts\\activate
-                python -m unittest discover -s .
-                '''
+                bat 'python3 -m unittest discover -s .'
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
                 bat '''
-                echo "Listing workspace files:"
-                dir
-                mkdir -p ${WORKSPACE}\\python-app-deploy
-                copy ${WORKSPACE}\\app.py ${WORKSPACE}\\python-app-deploy
+                mkdir -p ${WORKSPACE}/python-app-deploy
+                cp ${WORKSPACE}/app.py ${WORKSPACE}/python-app-deploy/
                 '''
             }
         }
@@ -36,8 +26,8 @@ pipeline {
             steps {
                 echo 'Running application...'
                 bat '''
-                nohup python ${WORKSPACE}\\python-app-deploy\\app.py > ${WORKSPACE}\\python-app-deploy\\app.log 2>&1 &
-                echo %! > ${WORKSPACE}\\python-app-deploy\\app.pid
+                nohup python3 ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
+                echo $! > ${WORKSPACE}/python-app-deploy/app.pid
                 '''
             }
         }
@@ -45,7 +35,7 @@ pipeline {
             steps {
                 echo 'Testing application...'
                 bat '''
-                python ${WORKSPACE}\\test_app.py
+                python3 ${WORKSPACE}/test_app.py
                 '''
             }
         }
