@@ -10,6 +10,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
+                bat 'pip install Flask'
                 bat 'python3 -m unittest discover -s .'
             }
         }
