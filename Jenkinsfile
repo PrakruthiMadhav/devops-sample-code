@@ -11,7 +11,7 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 bat 'pip install Flask'
-                bat 'python -m unittest discover -s tests -p "test_*.py"'
+                bat 'python -m unittest discover -s .'
             }
         }
         stage('Deploy') {
