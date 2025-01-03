@@ -25,6 +25,8 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 bat '''
+                echo "Listing workspace files:"
+                dir
                 mkdir -p ${WORKSPACE}\\python-app-deploy
                 copy ${WORKSPACE}\\app.py ${WORKSPACE}\\python-app-deploy
                 '''
