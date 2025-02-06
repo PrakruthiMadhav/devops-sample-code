@@ -1,42 +1,52 @@
 pipeline {
     agent any
+
     stages {
         stage('Build') {
             steps {
-                script {
-                    echo 'Building application...'
-                }
+                echo 'Creating virtual environment and installing dependencies...'
             }
         }
-
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh 'python3 -m unittest discover -s .'
+            }
+        }
         stage('Deploy') {
             steps {
-                script {
-                    echo 'Deploying application...'
-                    // Create the deployment directory using cmd
-                    bat "mkdir \"${WORKSPACE}\\python-app-deploy\""
-                    // Verify the existence of app.py
-                    bat "dir ${WORKSPACE}"
-                    // Copy the app.py file
-                    bat "copy \"${WORKSPACE}\\app.py\" \"${WORKSPACE}\\python-app-deploy\\\""
-                }
+                echo 'Deploying application...'
+                sh '''
+                mkdir -p ${WORKSPACE}/python-app-deploy
+                cp ${WORKSPACE}/app.py ${WORKSPACE}/python-app-deploy/
+                '''
             }
         }
-
         stage('Run Application') {
             steps {
-                script {
-                    echo 'Running application...'
-                }
+                echo 'Running application...'
+                sh '''
+                nohup python3 ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
+                echo $! > ${WORKSPACE}/python-app-deploy/app.pid
+                '''
             }
         }
-
         stage('Test Application') {
             steps {
-                script {
-                    echo 'Testing application...'
-                }
+                echo 'Testing application...'
+                sh '''
+                python3 ${WORKSPACE}/test_app.py
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }
